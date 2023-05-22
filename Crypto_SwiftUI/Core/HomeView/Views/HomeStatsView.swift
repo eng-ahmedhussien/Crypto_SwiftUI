@@ -20,8 +20,9 @@ struct HomeStatsView: View {
             }
         }
         .frame(width: UIScreen.main.bounds.width,
-               alignment: showPortfolio ?   .leading:.trailing
+               alignment: showPortfolio ? .trailing : .leading
         )
+
     }
 }
 

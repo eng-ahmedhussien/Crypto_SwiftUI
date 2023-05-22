@@ -14,7 +14,7 @@ class MarketDataService{
     var  cancellable = Set<AnyCancellable>()
     
     init(){
-        f etchDate()
+        fetchDate()
     }
     
     private  func fetchDate()  {

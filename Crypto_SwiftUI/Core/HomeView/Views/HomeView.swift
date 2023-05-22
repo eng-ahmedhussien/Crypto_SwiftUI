@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
-   @State var showPortfolio = true
+   @State var showPortfolioAnimation = false
+   @State var showPortfolioView = false
    @EnvironmentObject var VM  : HomeViewModel
     
     var body: some View {
@@ -19,24 +20,28 @@ struct HomeView: View {
                 headerView
                 Spacer(minLength: 30)
                 
-                //homeStatView
-                HomeStatsView(showPortfolio:$showPortfolio)
+                HomeStatsView(showPortfolio:$showPortfolioAnimation)
               
                 SearchBar(searchText:$VM.searchText)
 
                 listHeaders
-                    .padding(.horizontal)
-
-                if (showPortfolio){
+                   .padding(.horizontal)
+            
+                if (showPortfolioAnimation){
                     allCoinList
-                        .transition(.move(edge: .trailing))
+                        .transition(.move(edge: .leading))
                 }
                 else{
                     portfolioCoinList
-                        .transition(.move(edge: .leading))
+                        .transition(.move(edge: .trailing))
                 }
             }
         }
+        .sheet(isPresented: $showPortfolioView, content:{
+            PortfolioView()
+                .environmentObject(VM)
+        })
+        
     }
 
 }
@@ -53,42 +58,37 @@ struct HomeView_Previews: PreviewProvider {
 }
 
 extension HomeView{
+    //MARK:  headerView
     var headerView : some View{
         HStack{
-            CircleButton(title: showPortfolio ?"info":"plus")
-                .animation(.none, value: showPortfolio)
+            CircleButton(title: showPortfolioAnimation ?"plus":"info")
+                .animation(.none, value: showPortfolioAnimation)
+                .onTapGesture {
+                    if showPortfolioAnimation {
+                        showPortfolioView.toggle()
+                    }
+                }
             Spacer()
-            Text(showPortfolio ? "ahmed title" : "portfolio")
+            Text(showPortfolioAnimation ? "portfolio" : "Coin List")
                 .font(.title)
-                .animation(.none, value: showPortfolio)
+                .animation(.none, value: showPortfolioAnimation)
             Spacer()
             
-            CircleButton(title: "chevron.left" )
-                .rotationEffect(Angle(degrees: showPortfolio ? 180:0))
+            CircleButton(title: "chevron.right" )
+                .rotationEffect(Angle(degrees: showPortfolioAnimation ? 180:0))
                 .onTapGesture {
-                    withAnimation(){ showPortfolio.toggle()}
+                    withAnimation(){ showPortfolioAnimation.toggle()}
                 }
         }
-         .padding(.horizontal)
+        .padding(.horizontal, 30)
     }
-    
-//    var homeStatView : some View{
-//        HStack {
-//            ForEach(VM.statistics) { stat in
-//                StatisticView(stat: stat)
-//                    .frame(width: UIScreen.main.bounds.width / 3)
-//            }
-//        }
-////        .frame(width: UIScreen.main.bounds.width,
-////               alignment: showPortfolio ? .trailing : .leading
-////        )
-//    }
-    
+
+    //MARK:  listHeaders
     var listHeaders : some View{
         HStack{
             Text("Coin")
             Spacer()
-            if showPortfolio{
+            if !showPortfolioAnimation{
                 Text("Holding")
             }
             Text("Price")
@@ -99,19 +99,21 @@ extension HomeView{
         .foregroundColor(Color.theme.secondaryText )
     }
     
+    //MARK:  allCoinList view
     var allCoinList : some View{
         List {
             ForEach(VM.allCoin) { i in
-                CoinRowView(showHoldingsColumn: true, coin: i)
+                CoinRowView(showHoldingsColumn: false, coin: i)
             }
         }
         .listStyle(.plain)
     }
     
+    //MARK:  portfolioCoin view
     var portfolioCoinList : some View{
         List {
             ForEach(VM.allCoin) { i in
-                CoinRowView(showHoldingsColumn: false, coin: i)
+                CoinRowView(showHoldingsColumn: true, coin: i)
             }
         }
         .listStyle(.plain)
