@@ -29,7 +29,11 @@ struct PortfolioView: View {
                     toolBarItems
                 }
             }
+            .onChange(of: VM.searchText) { newValue in
+                selectedCoin = nil
+            }
         }
+        
     }
 }
 
@@ -50,7 +54,7 @@ extension PortfolioView{
                     CoinLogoView(coin: coin)
                         .frame(width: 70)
                         .onTapGesture {
-                            selectedCoin = coin
+                            updateSelectedCoin(coin: coin)
                         }
                         .background(
                             RoundedRectangle(cornerRadius: 10)
@@ -72,6 +76,7 @@ extension PortfolioView{
                 Text(selectedCoin?.currentPrice.asCurrencyWith6Decimals() ?? "")
             }
             Divider()
+            
             HStack {
                 Text("Amount holding:")
                 Spacer()
@@ -80,6 +85,7 @@ extension PortfolioView{
                     .keyboardType(.decimalPad)
             }
             Divider()
+            
             HStack {
                 Text("Current value:")
                 Spacer()
@@ -89,11 +95,11 @@ extension PortfolioView{
        // .animation(.none)
         .padding()
         .font(.headline)
+        
     }
     
     private var toolBarItems:some View{
         HStack{
-            
             Button {
                 print("")
             } label: {
@@ -120,17 +126,38 @@ extension PortfolioView{
     }
     
     private func saveButtonPressed() {
+        
+        
+        guard
+            let coin = selectedCoin,
+            let amount = Double(quantityText)
+            else { return }
+        
+        // save to portfolio
+        VM.updatePortfolio(coin: coin, amount: amount)
+       
         withAnimation(.easeIn){
             showCheckMark.toggle()
         }
         selectedCoin = nil
         VM.searchText = ""
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now()+1, execute:{
             withAnimation(.easeOut){
                 showCheckMark.toggle()
             }
         })
+    }
+    
+    private func updateSelectedCoin(coin: CoinModel) {
+        selectedCoin = coin
+        
+        if let portfolioCoin = VM.portfolioCoins.first(where: { $0.id == coin.id }),
+           let amount = portfolioCoin.currentHoldings {
+            quantityText = "\(amount)"
+        } else {
+            quantityText = ""
+        }
     }
     
 }

@@ -16,8 +16,10 @@ class HomeViewModel:ObservableObject{
     @Published var statistics: [StatisticModel] = []
     
     
+    
     private var coinDataService = CoinDataService()
     private var markedDataService = MarketDataService()
+    private var portfolioDataService = PortfolioDataService()
     private var cancellable = Set<AnyCancellable>()
     
     init(){
@@ -72,8 +74,45 @@ class HomeViewModel:ObservableObject{
             }
             .store(in: &cancellable)
         
+        $allCoin
+            .combineLatest(portfolioDataService.$dataFetched)
+            .map { (allcoins,portfolioEntities)->[CoinModel] in
+                allcoins
+                    .compactMap{ (coin) -> CoinModel? in
+                        guard let entity = portfolioEntities.first(where: { portfolioEntity in
+                            portfolioEntity.coidID == coin.id
+                        }) else {return nil}
+                        
+                        return coin.uploadHoldings(amount: entity.amount)
+                }
+            }
+            .sink { [weak self] returendCoins in
+                self?.portfolioCoins = returendCoins
+            }
+            .store(in: &cancellable)
+       
+        
+        
+        
+//                .compactMap { (coin) -> CoinModel? in
+//                    guard let entity = portfolioEntities.first(where: { $0.coinID == coin.id }) else {
+//                        return nil
+//                    }
+//                    return coin.updateHoldings(amount: entity.amount)
+                
+        // updates portfolioCoins
+//        $allCoins
+//            .combineLatest(portfolioDataService.$savedEntities)
+//            .map(mapAllCoinsToPortfolioCoins)
+//            .sink { [weak self] (returnedCoins) in
+//                guard let self = self else { return }
+//                self.portfolioCoins = self.sortPortfolioCoinsIfNeeded(coins: returnedCoins)
+//            }
+//            .store(in: &cancellable)
+        
         
     }
+    
     func filterCoins(text:String,coins:[CoinModel])->[CoinModel]{
         
         guard !text.isEmpty else{
@@ -108,6 +147,9 @@ class HomeViewModel:ObservableObject{
         return stata
     }
     
+    func updatePortfolio(coin: CoinModel, amount: Double) {
+        portfolioDataService.updatePortfolio(coin: coin, amount: amount)
+    }
     
     func subscribfuncWithMe(){
         

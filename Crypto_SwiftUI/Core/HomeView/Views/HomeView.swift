@@ -24,15 +24,15 @@ struct HomeView: View {
               
                 SearchBar(searchText:$VM.searchText)
 
-                listHeaders
+                headerslist
                    .padding(.horizontal)
             
                 if (showPortfolioAnimation){
-                    allCoinList
+                    portfolioCoinList
                         .transition(.move(edge: .leading))
                 }
                 else{
-                    portfolioCoinList
+                    allCoinList
                         .transition(.move(edge: .trailing))
                 }
             }
@@ -58,7 +58,7 @@ struct HomeView_Previews: PreviewProvider {
 }
 
 extension HomeView{
-    //MARK:  headerView
+
     var headerView : some View{
         HStack{
             CircleButton(title: showPortfolioAnimation ?"plus":"info")
@@ -83,12 +83,12 @@ extension HomeView{
         .padding(.horizontal, 30)
     }
 
-    //MARK:  listHeaders
-    var listHeaders : some View{
+   
+    var headerslist : some View{
         HStack{
             Text("Coin")
             Spacer()
-            if !showPortfolioAnimation{
+            if showPortfolioAnimation{
                 Text("Holding")
             }
             Text("Price")
@@ -99,7 +99,7 @@ extension HomeView{
         .foregroundColor(Color.theme.secondaryText )
     }
     
-    //MARK:  allCoinList view
+    
     var allCoinList : some View{
         List {
             ForEach(VM.allCoin) { i in
@@ -109,10 +109,10 @@ extension HomeView{
         .listStyle(.plain)
     }
     
-    //MARK:  portfolioCoin view
+    
     var portfolioCoinList : some View{
         List {
-            ForEach(VM.allCoin) { i in
+            ForEach(VM.portfolioCoins) { i in
                 CoinRowView(showHoldingsColumn: true, coin: i)
             }
         }
