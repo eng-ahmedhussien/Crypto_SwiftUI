@@ -21,7 +21,7 @@ struct Crypto_SwiftUIApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationView {
-                HomeView()
+                HomeView() 
             }
            .toolbar(.hidden)
            .environmentObject(VM)

@@ -9,7 +9,8 @@ import SwiftUI
 
 struct HomeView: View {
    @State var showPortfolioAnimation = false
-   @State var showPortfolioView = false
+    @State var showPortfolioView = false
+    @State var showLoading = false
    @EnvironmentObject var VM  : HomeViewModel
     
     var body: some View {
@@ -93,6 +94,16 @@ extension HomeView{
             }
             Text("Price")
                 .frame (width: UIScreen.main.bounds.width / 3.3, alignment: .trailing)
+            Button {
+                withAnimation(.linear(duration: 2.0)) {
+                    showLoading.toggle()
+                    VM.reloadData()
+                }
+            } label: {
+                Image(systemName: "goforward")
+            }
+            .rotationEffect(Angle(degrees: showLoading ? 360:0),anchor: .center)
+
         }
         .padding(.horizontal)
         .font(.caption)
@@ -117,6 +128,7 @@ extension HomeView{
             }
         }
         .listStyle(.plain)
+        
     }
     
 }

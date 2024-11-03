@@ -39,11 +39,11 @@ struct CoinRowView_Previews: PreviewProvider {
 extension CoinRowView{
     var leftView : some  View{
         HStack{
-            Text("\(coin.rank)")
+            Text("\(coin.marketCapRank?.asNumberString() ?? "0") ")
+                .font(.caption)
                 .foregroundColor (Color .theme.secondaryText)
             CoinImageview(coin: coin)
             .frame(width: 30,height:30)
-            
             Text(coin.symbol.uppercased())
                 .font(.headline)
                 .foregroundColor(Color.theme.accent)

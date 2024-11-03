@@ -17,10 +17,9 @@ struct PortfolioView: View {
         NavigationView {
             ScrollView{
                 SearchBar(searchText: $VM.searchText)
-                coinLogoList
-                
+                coinList
                 if selectedCoin != nil {
-                    portfolioInputSection
+                    portfolioView
                 }
             }
             .navigationTitle("Edit Portfolio")
@@ -47,7 +46,7 @@ struct PortfolioView_Previews: PreviewProvider {
 extension PortfolioView{
     
     
-    private var coinLogoList: some View {
+    private var coinList: some View {
         ScrollView(.horizontal){
             LazyHStack{
                 ForEach( VM.allCoin) { coin in
@@ -68,7 +67,7 @@ extension PortfolioView{
         }
     }
     
-    private var portfolioInputSection: some View {
+    private var portfolioView: some View {
         VStack(spacing: 20) {
             HStack {
                 Text("Current price of \(selectedCoin?.symbol.uppercased() ?? ""):")
