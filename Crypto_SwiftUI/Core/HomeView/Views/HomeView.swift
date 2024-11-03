@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct HomeView: View {
-   @State var showPortfolio = true
+   @State var showPortfolioAnimation = false
+    @State var showPortfolioView = false
+    @State var showLoading = false
    @EnvironmentObject var VM  : HomeViewModel
     
     var body: some View {
@@ -19,24 +21,28 @@ struct HomeView: View {
                 headerView
                 Spacer(minLength: 30)
                 
-                //homeStatView
-                HomeStatsView(showPortfolio:$showPortfolio)
+                HomeStatsView(showPortfolio:$showPortfolioAnimation)
               
                 SearchBar(searchText:$VM.searchText)
 
-                listHeaders
-                    .padding(.horizontal)
-
-                if (showPortfolio){
-                    allCoinList
-                        .transition(.move(edge: .trailing))
-                }
-                else{
+                headerslist
+                   .padding(.horizontal)
+            
+                if (showPortfolioAnimation){
                     portfolioCoinList
                         .transition(.move(edge: .leading))
                 }
+                else{
+                    allCoinList
+                        .transition(.move(edge: .trailing))
+                }
             }
         }
+        .sheet(isPresented: $showPortfolioView, content:{
+            PortfolioView()
+                .environmentObject(VM)
+        })
+        
     }
 
 }
@@ -53,68 +59,76 @@ struct HomeView_Previews: PreviewProvider {
 }
 
 extension HomeView{
+
     var headerView : some View{
         HStack{
-            CircleButton(title: showPortfolio ?"info":"plus")
-                .animation(.none, value: showPortfolio)
+            CircleButton(title: showPortfolioAnimation ?"plus":"info")
+                .animation(.none, value: showPortfolioAnimation)
+                .onTapGesture {
+                    if showPortfolioAnimation {
+                        showPortfolioView.toggle()
+                    }
+                }
             Spacer()
-            Text(showPortfolio ? "ahmed title" : "portfolio")
+            Text(showPortfolioAnimation ? "portfolio" : "Coin List")
                 .font(.title)
-                .animation(.none, value: showPortfolio)
+                .animation(.none, value: showPortfolioAnimation)
             Spacer()
             
-            CircleButton(title: "chevron.left" )
-                .rotationEffect(Angle(degrees: showPortfolio ? 180:0))
+            CircleButton(title: "chevron.right" )
+                .rotationEffect(Angle(degrees: showPortfolioAnimation ? 180:0))
                 .onTapGesture {
-                    withAnimation(){ showPortfolio.toggle()}
+                    withAnimation(){ showPortfolioAnimation.toggle()}
                 }
         }
-         .padding(.horizontal)
+        .padding(.horizontal, 30)
     }
-    
-//    var homeStatView : some View{
-//        HStack {
-//            ForEach(VM.statistics) { stat in
-//                StatisticView(stat: stat)
-//                    .frame(width: UIScreen.main.bounds.width / 3)
-//            }
-//        }
-////        .frame(width: UIScreen.main.bounds.width,
-////               alignment: showPortfolio ? .trailing : .leading
-////        )
-//    }
-    
-    var listHeaders : some View{
+
+   
+    var headerslist : some View{
         HStack{
             Text("Coin")
             Spacer()
-            if showPortfolio{
+            if showPortfolioAnimation{
                 Text("Holding")
             }
             Text("Price")
                 .frame (width: UIScreen.main.bounds.width / 3.3, alignment: .trailing)
+            Button {
+                withAnimation(.linear(duration: 2.0)) {
+                    showLoading.toggle()
+                    VM.reloadData()
+                }
+            } label: {
+                Image(systemName: "goforward")
+            }
+            .rotationEffect(Angle(degrees: showLoading ? 360:0),anchor: .center)
+
         }
         .padding(.horizontal)
         .font(.caption)
         .foregroundColor(Color.theme.secondaryText )
     }
     
-    var allCoinList : some View{
-        List {
-            ForEach(VM.allCoin) { i in
-                CoinRowView(showHoldingsColumn: true, coin: i)
-            }
-        }
-        .listStyle(.plain)
-    }
     
-    var portfolioCoinList : some View{
+    var allCoinList : some View{
         List {
             ForEach(VM.allCoin) { i in
                 CoinRowView(showHoldingsColumn: false, coin: i)
             }
         }
         .listStyle(.plain)
+    }
+    
+    
+    var portfolioCoinList : some View{
+        List {
+            ForEach(VM.portfolioCoins) { i in
+                CoinRowView(showHoldingsColumn: true, coin: i)
+            }
+        }
+        .listStyle(.plain)
+        
     }
     
 }

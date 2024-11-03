@@ -18,13 +18,11 @@ class ImageDataService{
     private let folderName = "coin_images"
     private let imageName: String
     
-
     init(coin: CoinModel) {
         self.coin = coin
         self.imageName = coin.id
         getCoinImage()
     }
-    
     private func getCoinImage() {
         if let savedImage =   LocalFileManager.instance.getImage(imageName: imageName, folderName: folderName){
             coinImage = savedImage
